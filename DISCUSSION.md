@@ -58,3 +58,6 @@ added 373 packages, and audited 374 packages in 4s
 - TODO: Phone numbers are unformatted.
 - TODO: Specialties take up a lot of room visually. Perhaps collapse or .join() into a paragraph instead of a list.
 - TODO: Cards are missing some personality.
+- TODO: Not showing `advocate.yearsOfExperience`
+
+4:35 - Improve layout styles and auto-complete the search.
