@@ -51,3 +51,10 @@ added 373 packages, and audited 374 packages in 4s
 - document.getElementById("search-term").innerHTML = searchTerm is unnecessarily unsafe
 
 3:11 - Time Check: Resolved build and search errors and added typescript definition.
+
+3:35 - Begin frontend styling
+4:05 - Add initial styles to convert from table to card layout
+- TODO: Search section is unformatted and...ugly
+- TODO: Phone numbers are unformatted.
+- TODO: Specialties take up a lot of room visually. Perhaps collapse or .join() into a paragraph instead of a list.
+- TODO: Cards are missing some personality.
