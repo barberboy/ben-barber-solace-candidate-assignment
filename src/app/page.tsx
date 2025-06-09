@@ -71,52 +71,34 @@ export default function Home() {
   };
 
   return (
-    <main style={{ margin: "24px" }}>
-      <h1>Solace Advocates</h1>
-      <br />
-      <br />
-      <div>
+    <main className="container mx-auto p-6">
+      <h1 className="font-serif text-center text-2xl">Solace Advocates</h1>
+      <div className="text-center">
         <p>Search</p>
+        <input className="border" ref={searchInput} onChange={onSearchChange} />
+        <button onClick={onResetClick}>Reset Search</button>
         <p>
           Searching for: <span ref={searchTermElement}></span>
         </p>
-        <input ref={searchInput} style={{ border: "1px solid black" }} onChange={onSearchChange} />
-        <button onClick={onResetClick}>Reset Search</button>
       </div>
-      <br />
-      <br />
-      <table>
-        <thead>
-          <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>City</th>
-            <th>Degree</th>
-            <th>Specialties</th>
-            <th>Years of Experience</th>
-            <th>Phone Number</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredAdvocates.map((advocate) => {
-            return (
-              <tr key={advocate.firstName + advocate.lastName}>
-                <td>{advocate.firstName}</td>
-                <td>{advocate.lastName}</td>
-                <td>{advocate.city}</td>
-                <td>{advocate.degree}</td>
-                <td>
-                  {advocate.specialties.map((s) => (
-                    <div key={s}>{s}</div>
-                  ))}
-                </td>
-                <td>{advocate.yearsOfExperience}</td>
-                <td>{advocate.phoneNumber}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <div className="grid gap-6 my-6 lg:grid-cols-3 md:grid-cols-2">
+        {filteredAdvocates.map(advocate => {
+          return (
+            <div className="p-6 border rounded-lg shadow-lg" key={advocate.firstName + advocate.lastName}>
+              <h3 className="font-serif font-bold text-xl">{advocate.firstName} {advocate.lastName}, {advocate.degree}</h3>
+              <div className="text-sm">{advocate.city}</div>
+              <div className="text-sm">{advocate.phoneNumber}</div>
+              <ul className="m-4 text-sm">
+                {advocate.specialties.map((s) => (
+                  <li className="list-disc" key={s}>{s}</li>
+                ))}
+              </ul>
+              {/* <td>{advocate.yearsOfExperience}</td> */}
+              {/* <td></td> */}
+            </div>
+          );
+        })}
+      </div>
     </main>
   );
 }
