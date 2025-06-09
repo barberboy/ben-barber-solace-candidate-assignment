@@ -87,18 +87,23 @@ export default function Home() {
             <div className="p-6 border rounded-lg shadow-lg" key={advocate.firstName + advocate.lastName}>
               <h3 className="font-serif font-bold text-xl">{advocate.firstName} {advocate.lastName}, {advocate.degree}</h3>
               <div className="text-sm">{advocate.city}</div>
-              <div className="text-sm">{advocate.phoneNumber}</div>
+              <div className="text-sm">{formatPhoneNumber(advocate.phoneNumber)}</div>
               <ul className="m-4 text-sm">
                 {advocate.specialties.map((s) => (
                   <li className="list-disc" key={s}>{s}</li>
                 ))}
               </ul>
-              {/* <td>{advocate.yearsOfExperience}</td> */}
-              {/* <td></td> */}
+              {/*{advocate.yearsOfExperience}*/}
             </div>
           );
         })}
       </div>
     </main>
   );
+}
+
+// TODO: Extract to util
+function formatPhoneNumber(phoneNumber: number) {
+  // This assumes phone numbers are a 10-digit number
+  return String(phoneNumber).replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3")
 }
