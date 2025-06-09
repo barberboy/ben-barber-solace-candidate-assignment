@@ -83,10 +83,10 @@ export default function Home() {
       <p className="text-center text-sm">
         I'm looking for assistance with&nbsp;
         <input placeholder="..." list="specialties-list" width={16} className="border rounded p-1 focus  :border" ref={searchInput} onInput={onSearchChange} ></input>
-        <button className="rounded-full bg-slate-100 text-xs border h-6 w-6" onClick={onResetClick}>✕</button>
+        <button className="rounded-full bg-slate-100 text-xs border h-6 w-6 ml-1" onClick={onResetClick}>✕</button>
       </p>
 
-      <h2 className="text-center mt-12 mb6 text-sm">
+      <h2 className="text-center mt-6 mb-6 text-sm">
         {searchInput?.current?.value
           ? <span>Advocates for <span className="font-bold" ref={searchTermElement}>{searchInput?.current?.value}</span>:</span>
           : <span>&nbsp;</span>
@@ -104,12 +104,7 @@ export default function Home() {
               <h3 className="font-serif font-bold text-xl">{advocate.firstName} {advocate.lastName}, {advocate.degree}</h3>
               <div className="text-sm">{advocate.city}</div>
               <div className="text-sm">{formatPhoneNumber(advocate.phoneNumber)}</div>
-              <ul className="m-4 text-sm">
-                {advocate.specialties.map((s) => (
-                  <li className="list-disc" key={s}>{s}</li>
-                ))}
-              </ul>
-              {/*{advocate.yearsOfExperience}*/}
+              <p className="text-sm my-3">{advocate.firstName} has {advocate.yearsOfExperience} years of experience specialized in {advocate.specialties.join(', ').toLowerCase()}.</p>
             </div>
           );
         })}
