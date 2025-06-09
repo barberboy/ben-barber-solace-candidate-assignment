@@ -2,16 +2,28 @@
 
 import { useEffect, useState } from "react";
 
+// TODO: Give this a better home.
+interface Advocate {
+  firstName: string,
+  lastName: string,
+  city: string,
+  degree: string,
+  specialties: string[],
+  yearsOfExperience: number,
+  phoneNumber: number,
+}
+
 export default function Home() {
-  const [advocates, setAdvocates] = useState([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState([]);
+  const [advocates, setAdvocates] = useState<Advocate[]>([]);
+  const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
 
   useEffect(() => {
     console.log("fetching advocates...");
     fetch("/api/advocates").then((response) => {
       response.json().then((jsonResponse) => {
-        setAdvocates(jsonResponse.data);
-        setFilteredAdvocates(jsonResponse.data);
+        const advocates: Advocate[] = jsonResponse.data
+        setAdvocates(advocates);
+        setFilteredAdvocates(advocates);
       });
     });
   }, []);
