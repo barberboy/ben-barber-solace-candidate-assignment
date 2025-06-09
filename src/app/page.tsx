@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 // TODO: Give this a better home.
 interface Advocate {
@@ -17,6 +17,10 @@ export default function Home() {
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
   const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
 
+  const searchInput = useRef<HTMLInputElement>(null)
+  const searchTermElement = useRef<HTMLSpanElement>(null)
+
+  // TODO convert to custom hook and add querying
   useEffect(() => {
     console.log("fetching advocates...");
     fetch("/api/advocates").then((response) => {
@@ -28,12 +32,17 @@ export default function Home() {
     });
   }, []);
 
-  const onChange = (e) => {
-    const searchTerm = e.target.value;
+  const onSearchChange = () => {
+    const searchTerm = searchInput?.current?.value || '';
 
-    document.getElementById("search-term").innerHTML = searchTerm;
+    // document.getElementById("search-term").innerHTML = searchTerm;
+    if (searchTermElement && searchTermElement.current) {
+      searchTermElement.current.textContent = searchTerm
+    }
 
     console.log("filtering advocates...");
+
+    // TODO: Move filtering to the server
     const filteredAdvocates = advocates.filter((advocate) => {
       return (
         advocate.firstName.includes(searchTerm) ||
@@ -48,9 +57,17 @@ export default function Home() {
     setFilteredAdvocates(filteredAdvocates);
   };
 
-  const onClick = () => {
+  const onResetClick = () => {
     console.log(advocates);
     setFilteredAdvocates(advocates);
+
+    // Update search input and the search term when reset is clicked.
+    if (searchInput && searchInput.current) {
+      searchInput.current.value = ''
+    }
+    if (searchTermElement && searchTermElement.current) {
+      searchTermElement.current.textContent = ''
+    }
   };
 
   return (
@@ -61,10 +78,10 @@ export default function Home() {
       <div>
         <p>Search</p>
         <p>
-          Searching for: <span id="search-term"></span>
+          Searching for: <span ref={searchTermElement}></span>
         </p>
-        <input style={{ border: "1px solid black" }} onChange={onChange} />
-        <button onClick={onClick}>Reset Search</button>
+        <input ref={searchInput} style={{ border: "1px solid black" }} onChange={onSearchChange} />
+        <button onClick={onResetClick}>Reset Search</button>
       </div>
       <br />
       <br />
