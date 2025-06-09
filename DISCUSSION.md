@@ -66,3 +66,4 @@ added 373 packages, and audited 374 packages in 4s
 - TODO: Move searching to the server
 - TODO: Add filter by state as well
 
+5:30 - Set up and seeded Postgres data, but ran out of time to implement filtering :(

@@ -1,4 +1,3 @@
-// TODO: Fetch this from the server
 export default [
     "Bipolar",
     "LGBTQ",
