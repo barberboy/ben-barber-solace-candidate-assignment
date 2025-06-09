@@ -60,4 +60,9 @@ added 373 packages, and audited 374 packages in 4s
 - TODO: Cards are missing some personality.
 - TODO: Not showing `advocate.yearsOfExperience`
 
-4:35 - Improve layout styles and auto-complete the search.
+4:45 - Improve layout styles and auto-complete the search.
+- TODO: Fetch the specialties from the server
+- TODO: Include a photo to improve personalization
+- TODO: Move searching to the server
+- TODO: Add filter by state as well
+
