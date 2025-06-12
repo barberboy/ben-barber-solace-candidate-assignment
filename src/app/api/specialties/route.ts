@@ -1,6 +1,13 @@
-// TODO fetch this from the database
-import specialtiesList from "@/app/utils/specialties-list";
+import { sql } from 'drizzle-orm'
+
+import db from "../../../db";
+import { advocates } from "../../../db/schema";
+
 
 export async function GET() {
-  return Response.json({ data: specialtiesList });
+  const data = await db.execute(
+    sql`SELECT distinct(unnest(${advocates.specialties})) as name FROM ${advocates} order by name asc`
+  )
+  const specialties = data.map(({ name }) => name)
+  return Response.json({ data: specialties });
 }
