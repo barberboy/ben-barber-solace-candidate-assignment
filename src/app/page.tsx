@@ -1,12 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, ChangeEvent, EventHandler, MouseEventHandler, FormEventHandler } from "react";
+import formatPhoneNumber from "./utils/format-phone-number";
 
-// TODO: get a distinct list of specialties from the server.
-import specialtiesList from "./utils/specialties-list"
-
-// TODO: Give this a better home.
-interface Advocate {
+type Advocate = {
   firstName: string,
   lastName: string,
   city: string,
@@ -16,89 +13,109 @@ interface Advocate {
   phoneNumber: number,
 }
 
+const PAGE_LIMIT = 6
+
 export default function Home() {
-  const [advocates, setAdvocates] = useState<Advocate[]>([]);
-  const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
+  const [advocates, setAdvocates] = useState<Advocate[]>([])
+  const [specialties, setSpecialties] = useState<string[]>([])
+  const [specialty, setSpecialty] = useState<string>("")
+  const [page, setPage] = useState<number>(0)
 
-  const searchInput = useRef<HTMLInputElement>(null)
-  const searchTermElement = useRef<HTMLSpanElement>(null)
+  const fetchAdvocates = async (specialty = '', page = 0) => {
+    // Set up query params based on state
+    const params = new URLSearchParams
+    params.set('limit', String(PAGE_LIMIT))
+    params.set('offset', String(PAGE_LIMIT * page))
+    if (specialty) {
+      params.set('specialty', specialty)
+    }
 
-  // TODO convert to custom hook and add querying
+    console.log("fetching advocates with params " + params);
+    const response = await fetch('/api/advocates?' + params)
+    const json = await response.json()
+    const adv: Advocate[] = json.data
+
+    console.log({ advocates: adv })
+
+    if (page) {
+      setAdvocates(advocates.concat(adv))
+    } else {
+      setAdvocates(adv)
+    }
+  }
+
+  const fetchSpecialties = async () => {
+    console.log("fetching specialties...");
+    const response = await fetch(`/api/specialties`);
+    const json = await response.json();
+    const specialties: string[] = json.data;
+
+    console.log({ specialties });
+    setSpecialties(specialties);
+  };  
+
   useEffect(() => {
-    console.log("fetching advocates...");
-    fetch("/api/advocates").then((response) => {
-      response.json().then((jsonResponse) => {
-        const advocates: Advocate[] = jsonResponse.data
-        setAdvocates(advocates);
-        setFilteredAdvocates(advocates);
-      });
-    });
+    console.log("use effect called to fetch advocates")
+    fetchAdvocates()
+  }, []);
+  
+  useEffect(() => {
+    console.log("use effect called to fetch advocates")
+    fetchSpecialties()
   }, []);
 
-  const onSearchChange = () => {
-    const searchTerm = searchInput?.current?.value || '';
+  const selectSpecialty = (specialty: string) => {
+    setPage(0)
+    setSpecialty(specialty)
+    fetchAdvocates(specialty)
+  }
 
-    // document.getElementById("search-term").innerHTML = searchTerm;
-    if (searchTermElement && searchTermElement.current) {
-      searchTermElement.current.textContent = searchTerm
+  const onSearchChange = (ev: ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = ev.currentTarget.value
+    console.log("Search term updated", { searchTerm })
+    if (!searchTerm || specialties.includes(searchTerm)) {
+      selectSpecialty(searchTerm)
     }
-
-    console.log("filtering advocates...");
-
-    // TODO: Move filtering to the server
-    const filteredAdvocates = advocates.filter((advocate) => {
-      if (!searchTerm) return true;
-
-      return (
-        // Only search on specialty
-        // advocate.firstName.includes(searchTerm) ||
-        // advocate.lastName.includes(searchTerm) ||
-        // advocate.city.includes(searchTerm) ||
-        // advocate.degree.includes(searchTerm) ||
-        advocate.specialties.join(' ').includes(searchTerm)
-        // advocate.yearsOfExperience.includes(searchTerm)
-      );
-    });
-
-    setFilteredAdvocates(filteredAdvocates);
-  };
+  }
 
   const onResetClick = () => {
-    console.log(advocates);
-    setFilteredAdvocates(advocates);
+    console.log('Resetting')
+    selectSpecialty('')
+  }
 
-    // Update search input and the search term when reset is clicked.
-    if (searchInput && searchInput.current) {
-      searchInput.current.value = ''
-    }
-    if (searchTermElement && searchTermElement.current) {
-      searchTermElement.current.textContent = ''
-    }
-  };
+  const onMoreClick = () => {
+    console.log('Clicked more advocates')
+    const pagesize = page + 1
+    setPage(pagesize)
+    fetchAdvocates(specialty, pagesize)
+  }
+
+  const needsMore = advocates.length >= (page + 1) * PAGE_LIMIT;
 
   return (
     <main className="container mx-auto p-6">
       <h1 className="font-serif text-center text-2xl">Solace Advocates</h1>
       <h2 className="font-serif text-center text-xl m-6">Find your health care advocate today.</h2>
+
       <p className="text-center text-sm">
-        I'm looking for assistance with&nbsp;
-        <input placeholder="..." list="specialties-list" width={16} className="border rounded p-1 focus  :border" ref={searchInput} onInput={onSearchChange} ></input>
+        I&rsquo;m looking for assistance with&nbsp;
+        <input key={specialty} placeholder={specialty || '…'} list="specialties-list" width={16} className="border rounded p-1 focus:border" onInput={onSearchChange} ></input>
         <button className="rounded-full bg-slate-100 text-xs border h-6 w-6 ml-1" onClick={onResetClick}>✕</button>
+
+        <datalist id="specialties-list">
+          {specialties.map(sp => <option key={sp} value={sp} />)}
+        </datalist>
       </p>
 
       <h2 className="text-center mt-6 mb-6 text-sm">
-        {searchInput?.current?.value
-          ? <span>Advocates for <span className="font-bold" ref={searchTermElement}>{searchInput?.current?.value}</span>:</span>
+        {specialty
+          ? <span>Advocates for <span className="font-bold">{specialty}</span>:</span>
           : <span>&nbsp;</span>
         }
       </h2>
 
-      <datalist id="specialties-list">
-        {specialtiesList.map(specialty => <option key={specialty} value={specialty} />)}
-      </datalist>
-
-      <div className="grid gap-6 my-6 lg:grid-cols-3 md:grid-cols-2">
-        {filteredAdvocates.map(advocate => {
+      <div key={specialty} className="grid gap-6 my-6 lg:grid-cols-3 md:grid-cols-2">
+        {advocates.map(advocate => {
           return (
             <div className="p-6 border rounded-lg shadow-lg" key={advocate.firstName + advocate.lastName}>
               <h3 className="font-serif font-bold text-xl">{advocate.firstName} {advocate.lastName}, {advocate.degree}</h3>
@@ -109,12 +126,12 @@ export default function Home() {
           );
         })}
       </div>
+
+      {
+        needsMore && (
+          <div className="text-center"><button className="justify-self-center rounded-full border px-4 py-1" onClick={onMoreClick}>More</button></div>
+        )
+      }
     </main>
   );
-}
-
-// TODO: Extract to util
-function formatPhoneNumber(phoneNumber: number) {
-  // This assumes phone numbers are a 10-digit number
-  return String(phoneNumber).replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3")
 }
