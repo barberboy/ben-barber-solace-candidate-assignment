@@ -44,25 +44,26 @@ added 373 packages, and audited 374 packages in 4s
 - page.tsx:79 Warning: Each child in a list should have a unique "key" prop.
 
 ** Code **
-- `/api/advocates` is fetched statically
-- Direct DOM access with getElementById
-  - TODO: switch to refs
-- Type errors/warnings
-- document.getElementById("search-term").innerHTML = searchTerm is unnecessarily unsafe
+- [x] `/api/advocates` is fetched statically
+- [x] direct DOM access with getElementById
+  - [x] switch to refs
+- [x] Type errors/warnings
+- [x] document.getElementById("search-term").innerHTML = searchTerm is unnecessarily unsafe
 
 3:11 - Time Check: Resolved build and search errors and added typescript definition.
 
 3:35 - Begin frontend styling
 4:05 - Add initial styles to convert from table to card layout
-- TODO: Search section is unformatted and...ugly
-- TODO: Phone numbers are unformatted.
-- TODO: Specialties take up a lot of room visually. Perhaps collapse or .join() into a paragraph instead of a list.
-- TODO: Cards are missing some personality.
-- TODO: Not showing `advocate.yearsOfExperience`
+- [x] Search section is unformatted and...ugly
+- [x] Phone numbers are unformatted.
+- [x] Specialties take up a lot of room visually. Perhaps collapse or .join() into a paragraph instead of a list.
+- [x] Cards are missing some personality.
+- [x] Not showing `advocate.yearsOfExperience`
 
 4:45 - Improve layout styles and auto-complete the search.
-- TODO: Fetch the specialties from the server
+- [x] Fetch the specialties from the server~
+- [x] Move searching to the server
 - TODO: Include a photo to improve personalization
-- TODO: Move searching to the server
 - TODO: Add filter by state as well
 
+5:30 - Set up and seeded Postgres data, but ran out of time to implement filtering :(
