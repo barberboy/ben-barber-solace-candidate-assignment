@@ -1,93 +1,100 @@
 "use client";
 
-import { useEffect, useState, ChangeEvent, EventHandler, MouseEventHandler, FormEventHandler } from "react";
+import { useEffect, useState, ChangeEvent, useCallback } from "react";
 import formatPhoneNumber from "./utils/format-phone-number";
 
 type Advocate = {
-  firstName: string,
-  lastName: string,
-  city: string,
-  degree: string,
-  specialties: string[],
-  yearsOfExperience: number,
-  phoneNumber: number,
+  firstName: string;
+  lastName: string;
+  city: string;
+  degree: string;
+  specialties: string[];
+  yearsOfExperience: number;
+  phoneNumber: number;
 }
 
-const PAGE_LIMIT = 6
+const PAGE_LIMIT = 6;
+const SORT_OPTIONS = [{
+  key: "experience",
+  label: "Experience"
+}, {
+  key: "name",
+  label: "Last Name"
+}];
 
 export default function Home() {
-  const [advocates, setAdvocates] = useState<Advocate[]>([])
-  const [specialties, setSpecialties] = useState<string[]>([])
-  const [specialty, setSpecialty] = useState<string>("")
-  const [page, setPage] = useState<number>(0)
+  const [advocates, setAdvocates] = useState<Advocate[]>([]);
+  const [page, setPage] = useState<number>(0);
+  const [sort, setSort] = useState<string>("name");
+  const [specialties, setSpecialties] = useState<string[]>([]);
+  const [specialty, setSpecialty] = useState<string>("");
 
-  const fetchAdvocates = async (specialty = '', page = 0) => {
-    // Set up query params based on state
-    const params = new URLSearchParams
-    params.set('limit', String(PAGE_LIMIT))
-    params.set('offset', String(PAGE_LIMIT * page))
+  const fetchAdvocates = useCallback(async () => {
+    const params = new URLSearchParams({
+      'limit': String(PAGE_LIMIT),
+      'offset': String(PAGE_LIMIT * page)
+    });
+
     if (specialty) {
-      params.set('specialty', specialty)
+      params.set('specialty', specialty);
     }
 
-    console.log("fetching advocates with params " + params);
-    const response = await fetch('/api/advocates?' + params)
-    const json = await response.json()
-    const adv: Advocate[] = json.data
-
-    console.log({ advocates: adv })
-
-    if (page) {
-      setAdvocates(advocates.concat(adv))
-    } else {
-      setAdvocates(adv)
+    if (sort) {
+      params.set('sortBy', sort);
     }
-  }
 
-  const fetchSpecialties = async () => {
+    console.log(`fetching advocates with params ${params}`);
+    const response = await fetch(`/api/advocates?${params.toString()}`);
+    const json = await response.json();
+    const adv: Advocate[] = json.data;
+    console.log({ advocates: adv });
+
+    // If page is 0, replace the advocates array, otherwise append to the existing list
+    setAdvocates(a => page ? a.concat(adv): adv);
+  }, [ specialty, page, sort, setAdvocates ]);
+
+  const fetchSpecialties = useCallback(async () => {
     console.log("fetching specialties...");
     const response = await fetch(`/api/specialties`);
     const json = await response.json();
     const specialties: string[] = json.data;
-
     console.log({ specialties });
     setSpecialties(specialties);
-  };  
+  }, [ setSpecialties ]);
 
   useEffect(() => {
-    console.log("use effect called to fetch advocates")
-    fetchAdvocates()
-  }, []);
+    console.log("use effect called to fetch advocates and specialties");
+    fetchAdvocates();
+    fetchSpecialties();
+  }, [fetchAdvocates, fetchSpecialties ]);
   
-  useEffect(() => {
-    console.log("use effect called to fetch advocates")
-    fetchSpecialties()
-  }, []);
-
   const selectSpecialty = (specialty: string) => {
-    setPage(0)
-    setSpecialty(specialty)
-    fetchAdvocates(specialty)
+    setSpecialty(specialty);
+    setPage(0);
   }
 
   const onSearchChange = (ev: ChangeEvent<HTMLInputElement>) => {
-    const searchTerm = ev.currentTarget.value
-    console.log("Search term updated", { searchTerm })
+    const searchTerm = ev.currentTarget.value;
+    console.log("Search term updated", { searchTerm });
     if (!searchTerm || specialties.includes(searchTerm)) {
-      selectSpecialty(searchTerm)
+      selectSpecialty(searchTerm);
     }
   }
 
   const onResetClick = () => {
-    console.log('Resetting')
-    selectSpecialty('')
+    console.log('Resetting');
+    selectSpecialty('');
   }
 
   const onMoreClick = () => {
-    console.log('Clicked more advocates')
-    const pagesize = page + 1
-    setPage(pagesize)
-    fetchAdvocates(specialty, pagesize)
+    console.log('Loading more advocates');
+    setPage(page + 1);
+  }
+
+  const onSelectSort = (ev: ChangeEvent<HTMLSelectElement>) => {
+    console.log('Selected sort option', ev.target.value);
+    setSort(ev.target.value);
+    setPage(0);
   }
 
   const needsMore = advocates.length >= (page + 1) * PAGE_LIMIT;
@@ -105,6 +112,12 @@ export default function Home() {
         <datalist id="specialties-list">
           {specialties.map(sp => <option key={sp} value={sp} />)}
         </datalist>
+
+        &nbsp;sorted by&nbsp;
+
+        <select className="border rounded p-1" value={sort} onChange={onSelectSort}> 
+          {SORT_OPTIONS.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
+        </select>
       </p>
 
       <h2 className="text-center mt-6 mb-6 text-sm">
@@ -115,16 +128,15 @@ export default function Home() {
       </h2>
 
       <div key={specialty} className="grid gap-6 my-6 lg:grid-cols-3 md:grid-cols-2">
-        {advocates.map(advocate => {
-          return (
+        {advocates.map(advocate =>  (
             <div className="p-6 border rounded-lg shadow-lg" key={advocate.firstName + advocate.lastName}>
               <h3 className="font-serif font-bold text-xl">{advocate.firstName} {advocate.lastName}, {advocate.degree}</h3>
               <div className="text-sm">{advocate.city}</div>
               <div className="text-sm">{formatPhoneNumber(advocate.phoneNumber)}</div>
               <p className="text-sm my-3">{advocate.firstName} has {advocate.yearsOfExperience} years of experience specialized in {advocate.specialties.join(', ').toLowerCase()}.</p>
             </div>
-          );
-        })}
+          )
+        )}
       </div>
 
       {
